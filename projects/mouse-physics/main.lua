@@ -9,6 +9,8 @@ function love.load()
 	love.window.setMode(1000, 800, {resizable=false})
 	love.window.setTitle("Drag Objects")
 
+	love.graphics.setBackgroundColor(0, 0, 1)
+
 	-- Physics world initialization
 	love.physics.setMeter(meterSize)
     world = love.physics.newWorld(0, gravity * meterSize, true)
@@ -21,6 +23,7 @@ function love.load()
 	whale.body = love.physics.newBody(world, 500, 400, "dynamic")
 	whale.shape = love.physics.newCircleShape(whaleRadius)
 	whale.fixture = love.physics.newFixture(whale.body, whale.shape)
+	whale.fixture:setRestitution(0.5)
 
 	-- Draggable lv Logo
 	lv = {}
