@@ -1,9 +1,9 @@
-## Creating a Game with LÖVE
+## Using LÖVE's Libraries
 
 
 ### Hello World
 
-```lua
+```lua [1-3|1|2]
 function love.draw()
 	love.graphics.print("Hello World", 400, 300)
 end
@@ -12,7 +12,7 @@ end
 
 ### Images and Windows
 
-```lua
+```lua [1-13|1-6|2-3|5|8-13|9|10-11|12]
 function love.load()
 	love.window.setMode(800, 600, {resizable=true, minwidth=400, minheight=300})
 	love.window.setTitle("Scale Image")
@@ -31,7 +31,7 @@ end
 
 ### System Information
 
-```lua
+```lua [1-15|5-6|10-14|14]
 function love.load()
 	love.window.setMode(800, 600, {resizable=true, minwidth=800, minheight=600})
 	love.window.setTitle("System Info")
@@ -48,3 +48,87 @@ function love.draw()
 	love.graphics.print("Time Elapsed: " .. math.floor(love.timer.getTime()) .. "s", 50, 450)
 end
 ```
+
+
+### Physics
+#### Initialization
+
+```lua [1-26|2-4|8-9|13-20|24-25]
+function love.load()
+	gravity = 9.81
+	meterSize = 64
+	whaleRadius = 50
+
+	...
+
+	love.physics.setMeter(meterSize)
+    world = love.physics.newWorld(0, gravity * meterSize, true)
+
+	...
+
+	whale = {}
+	whale.image = love.graphics.newImage("gfx/whale.png")
+	whale.scaleX = whaleRadius * 2 / whale.image:getWidth()
+	whale.scaleY = whaleRadius * 2 / whale.image:getHeight()
+	whale.body = love.physics.newBody(world, 500, 400, "dynamic")
+	whale.shape = love.physics.newCircleShape(whaleRadius)
+	whale.fixture = love.physics.newFixture(whale.body, whale.shape)
+	whale.fixture:setRestitution(0.5)
+
+	...
+
+	dragging = false
+	whaleMouseJoint = nil
+end
+```
+
+
+### Physics
+#### Mouse and Joints
+
+```lua [1-9|1-2|3-4|5-6|11-15|11|13|17-23|19-20]
+function love.mousepressed(x, y, button)
+    if button == 1 then
+        local distance = math.sqrt((x - whale.body:getX())^2 + (y - whale.body:getY())^2)
+        if distance < whaleRadius then
+            dragging = true
+            whaleMouseJoint = love.physics.newMouseJoint(whale.body, x, y)
+        end
+    end
+end
+
+function love.mousemoved(x, y, dx, dy)
+    if dragging and whaleMouseJoint then
+		whaleMouseJoint:setTarget(x, y)
+	end
+end
+
+function love.mousereleased(x, y, button)
+    if button == 1 and whaleMouseJoint then
+        whaleMouseJoint:destroy()
+        whaleMouseJoint = nil
+        dragging = false
+    end
+end
+```
+
+
+### Physics
+#### Updating
+
+```lua [1-3|6-7|9-10]
+function love.update(dt)
+	world:update(dt)
+end
+
+function love.draw()
+	love.graphics.setColor(0.1, 0.7, 0.1)
+    love.graphics.polygon("fill", ground.body:getWorldPoints(ground.shape:getPoints()))
+
+	love.graphics.setColor(1, 1, 1)
+	love.graphics.draw(whale.image, whale.body:getX(), whale.body:getY(), whale.body:getAngle(), whale.scaleX, whale.scaleY, whale.image:getWidth()/2, whale.image:getHeight()/2)
+end
+```
+
+
+### Using External Libraries
