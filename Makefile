@@ -3,6 +3,7 @@
 present: presentation/reveal.js
 	cp presentation/index.html presentation/reveal.js/
 	cp presentation/*.md presentation/reveal.js/
+	cp -r presentation/img presentation/reveal.js/
 	cd presentation/reveal.js && npm start
 
 presentation/reveal.js:
